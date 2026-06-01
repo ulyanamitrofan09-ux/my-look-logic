@@ -83,7 +83,9 @@ function AddItem() {
         <button onClick={() => fileRef.current?.click()}
           className="w-full aspect-square card-soft border-2 border-dashed border-border flex flex-col items-center justify-center gap-3 overflow-hidden">
           {preview ? (
-            <img src={preview} alt="preview" className="w-full h-full object-contain bg-white" />
+            <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: "#FFFFFF", padding: 8, minHeight: 180 }}>
+              <img src={preview} alt="preview" style={{ objectFit: "contain", maxHeight: 160, width: "100%", mixBlendMode: "multiply" }} />
+            </div>
           ) : (
             <>
               <Camera size={36} className="text-muted-foreground" />

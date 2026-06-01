@@ -50,8 +50,8 @@ function Lookbook() {
               <div key={o.id} className="card-soft p-3">
                 <div className="grid grid-cols-3 gap-1">
                   {o.itemDetails.slice(0, 3).map((it: any) => (
-                    <div key={it.id} className="aspect-square bg-white rounded-md overflow-hidden flex items-center justify-center">
-                      <img src={it.photo_url} alt="" className="w-full h-full object-contain" />
+                    <div key={it.id} className="rounded-md overflow-hidden flex items-center justify-center" style={{ backgroundColor: "#FFFFFF", padding: 8, minHeight: 180 }}>
+                      <img src={it.photo_url} alt="" style={{ objectFit: "contain", maxHeight: 160, width: "100%", mixBlendMode: "multiply" }} />
                     </div>
                   ))}
                 </div>

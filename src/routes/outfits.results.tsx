@@ -130,8 +130,8 @@ function Results() {
             <div className="grid grid-cols-3 gap-2">
               {o.items.slice(0, 3).map(it => (
                 <div key={it.id}>
-                  <div className="aspect-square bg-white rounded-xl overflow-hidden flex items-center justify-center p-1">
-                    <img src={it.photo_url} alt={it.name || it.type} className="w-full h-full object-contain" />
+                  <div className="rounded-xl overflow-hidden flex items-center justify-center" style={{ backgroundColor: "#FFFFFF", padding: 8, minHeight: 180 }}>
+                    <img src={it.photo_url} alt={it.name || it.type} style={{ objectFit: "contain", maxHeight: 160, width: "100%", mixBlendMode: "multiply" }} />
                   </div>
                   <div className="mt-1 text-[11px] text-muted-foreground text-center truncate">{it.name || it.subtype || it.type}</div>
                 </div>
