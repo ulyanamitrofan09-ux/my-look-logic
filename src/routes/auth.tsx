@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>) => ({ email: (s.email as string) || "" }),
@@ -44,9 +45,9 @@ function AuthPage() {
 
   const google = async () => {
     try {
-      const { lovable } = await import("@/integrations/lovable");
-      const result = await (lovable as any).auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/wardrobe" });
+      const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/wardrobe" });
       if (result?.error) toast.error("Google sign-in failed");
+      else if (!result?.redirected) navigate({ to: "/wardrobe" });
     } catch {
       toast.error("Google sign-in unavailable");
     }
