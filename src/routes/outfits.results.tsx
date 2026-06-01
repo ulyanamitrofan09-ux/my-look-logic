@@ -72,7 +72,7 @@ function makeOutfits(items: Item[], occasion: string): Outfit[] {
 
   return combos.slice(0, target).map((set, i) => ({
     name: NAMES[i % NAMES.length],
-    explanation: `This combination works for "${occasion.toLowerCase()}" because the pieces share a tonal harmony — about 60% neutral, 30% mid-tone, 10% accent — and the proportions stay balanced. Formality lands in the right range without trying too hard.`,
+    explanation: `Этот образ подходит для «${occasion.toLowerCase()}», потому что вещи объединены тональной гармонией — примерно 60% нейтральных оттенков, 30% средних и 10% акцентных, — а пропорции остаются сбалансированными. Уровень формальности попадает точно в нужный регистр, без лишних усилий.`,
     tags: TAGS[i % TAGS.length],
     items: set,
   }));
