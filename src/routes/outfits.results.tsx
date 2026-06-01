@@ -23,30 +23,54 @@ const NAMES = ["Confident Classic", "Quiet Power", "Soft Definition", "Easy Poli
 const TAGS = [["Polished", "Tailored"], ["Soft", "Considered"], ["Bold", "Modern"], ["Easy", "Refined"]];
 
 function makeOutfits(items: Item[], occasion: string): Outfit[] {
-  const tops = items.filter(i => i.type === "Top");
-  const bottoms = items.filter(i => i.type === "Bottom");
-  const dresses = items.filter(i => i.type === "Dress" || i.type === "Jumpsuit");
-  const shoes = items.filter(i => i.type === "Shoes");
-  const accents = items.filter(i => ["Bag", "Accessory", "Outerwear"].includes(i.type));
+  const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
+  const tops = shuffle(items.filter(i => i.type === "Top"));
+  const bottoms = shuffle(items.filter(i => i.type === "Bottom"));
+  const dresses = shuffle(items.filter(i => i.type === "Dress" || i.type === "Jumpsuit"));
+  const shoes = shuffle(items.filter(i => i.type === "Shoes"));
+  const accents = shuffle(items.filter(i => ["Bag", "Accessory", "Outerwear"].includes(i.type)));
 
+  const target = items.length < 6 ? 2 : 3;
   const combos: Item[][] = [];
-  const tryAdd = (a?: Item, b?: Item, c?: Item) => {
-    const set = [a, b, c].filter(Boolean) as Item[];
-    if (set.length >= 2) combos.push(set);
+  const usedKeys = new Set<string>();
+  const usedItems = new Set<string>();
+
+  const tryPush = (set: Item[]) => {
+    const uniq = Array.from(new Map(set.map(i => [i.id, i])).values());
+    if (uniq.length < 2) return false;
+    const key = uniq.map(i => i.id).sort().join("|");
+    if (usedKeys.has(key)) return false;
+    usedKeys.add(key);
+    uniq.forEach(i => usedItems.add(i.id));
+    combos.push(uniq.slice(0, 3));
+    return true;
   };
 
-  for (let i = 0; i < 3; i++) {
-    if (tops[i % Math.max(1, tops.length)] && bottoms[i % Math.max(1, bottoms.length)]) {
-      tryAdd(tops[i % tops.length], bottoms[i % bottoms.length], shoes[i % shoes.length] || accents[i % accents.length]);
-    } else if (dresses[i % Math.max(1, dresses.length)]) {
-      tryAdd(dresses[i % dresses.length], shoes[i % shoes.length], accents[i % accents.length]);
+  const pickFresh = (pool: Item[]): Item | undefined =>
+    pool.find(i => !usedItems.has(i.id)) || pool[Math.floor(Math.random() * pool.length)];
+
+  for (let i = 0; i < target * 4 && combos.length < target; i++) {
+    const set: Item[] = [];
+    if (tops.length && bottoms.length) {
+      const t = pickFresh(tops); if (t) set.push(t);
+      const b = pickFresh(bottoms); if (b) set.push(b);
+    } else if (dresses.length) {
+      const d = pickFresh(dresses); if (d) set.push(d);
+    }
+    const sh = pickFresh(shoes); if (sh) set.push(sh);
+    if (set.length < 3) { const a = pickFresh(accents); if (a) set.push(a); }
+    if (!tryPush(set)) {
+      // reset used items to allow reuse if we can't find fresh combos
+      if (i === target * 2) usedItems.clear();
     }
   }
-  while (combos.length < 3 && items.length >= 2) {
-    const shuffled = [...items].sort(() => Math.random() - 0.5).slice(0, 3);
-    combos.push(shuffled);
+
+  let guard = 0;
+  while (combos.length < target && items.length >= 2 && guard++ < 30) {
+    tryPush(shuffle(items).slice(0, 3));
   }
-  return combos.slice(0, 3).map((set, i) => ({
+
+  return combos.slice(0, target).map((set, i) => ({
     name: NAMES[i % NAMES.length],
     explanation: `This combination works for "${occasion.toLowerCase()}" because the pieces share a tonal harmony — about 60% neutral, 30% mid-tone, 10% accent — and the proportions stay balanced. Formality lands in the right range without trying too hard.`,
     tags: TAGS[i % TAGS.length],
