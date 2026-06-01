@@ -1,14 +1,34 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { AuthGate } from "@/components/AuthGate";
+import { removeBackground } from "@/lib/removebg.functions";
 
 export const Route = createFileRoute("/wardrobe/add")({
   component: () => <AuthGate><AddItem /></AuthGate>,
 });
+
+const fileToBase64 = (file: Blob): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      resolve(result.split(",")[1] || "");
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+const base64ToBlob = (b64: string, mime: string): Blob => {
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new Blob([bytes], { type: mime });
+};
 
 const TYPES = ["Top", "Bottom", "Dress", "Jumpsuit", "Outerwear", "Shoes", "Bag", "Accessory"];
 const SEASONS = ["Spring/Summer", "Fall/Winter", "Year-round"];
