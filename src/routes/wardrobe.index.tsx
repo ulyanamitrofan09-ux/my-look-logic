@@ -79,8 +79,8 @@ function WardrobePage() {
           <div className="grid grid-cols-2 gap-3">
             {filtered.map(it => (
               <div key={it.id} className="card-soft overflow-hidden">
-                <div className="aspect-square bg-white flex items-center justify-center p-2">
-                  <img src={it.photo_url} alt={it.name || it.type} className="w-full h-full object-contain" />
+                <div className="flex items-center justify-center" style={{ backgroundColor: "#FFFFFF", padding: 8, minHeight: 180 }}>
+                  <img src={it.photo_url} alt={it.name || it.type} style={{ objectFit: "contain", maxHeight: 160, width: "100%", mixBlendMode: "multiply" }} />
                 </div>
                 <div className="px-3 py-2 text-[13px] text-muted-foreground">{it.name || it.subtype || it.type}</div>
               </div>
