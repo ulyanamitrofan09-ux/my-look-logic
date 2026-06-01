@@ -19,8 +19,8 @@ export const Route = createFileRoute("/outfits/results")({
 type Item = { id: string; name: string | null; type: string; subtype: string | null; photo_url: string };
 type Outfit = { name: string; explanation: string; tags: string[]; items: Item[] };
 
-const NAMES = ["Confident Classic", "Quiet Power", "Soft Definition", "Easy Polish", "Modern Elegance", "Effortless Edit"];
-const TAGS = [["Polished", "Tailored"], ["Soft", "Considered"], ["Bold", "Modern"], ["Easy", "Refined"]];
+const NAMES = ["Уверенная классика", "Тихая сила", "Мягкие акценты", "Лёгкая элегантность", "Современный шик", "Непринуждённый образ"];
+const TAGS = [["Утончённый", "По фигуре"], ["Мягкий", "Продуманный"], ["Смелый", "Современный"], ["Лёгкий", "Изысканный"]];
 
 function makeOutfits(items: Item[], occasion: string): Outfit[] {
   const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
@@ -72,7 +72,7 @@ function makeOutfits(items: Item[], occasion: string): Outfit[] {
 
   return combos.slice(0, target).map((set, i) => ({
     name: NAMES[i % NAMES.length],
-    explanation: `This combination works for "${occasion.toLowerCase()}" because the pieces share a tonal harmony — about 60% neutral, 30% mid-tone, 10% accent — and the proportions stay balanced. Formality lands in the right range without trying too hard.`,
+    explanation: `Этот образ подходит для «${occasion.toLowerCase()}», потому что вещи объединены тональной гармонией — примерно 60% нейтральных оттенков, 30% средних и 10% акцентных, — а пропорции остаются сбалансированными. Уровень формальности попадает точно в нужный регистр, без лишних усилий.`,
     tags: TAGS[i % TAGS.length],
     items: set,
   }));
@@ -102,9 +102,9 @@ function Results() {
       user_id: user.id, name: o.name, occasion, weather, mood: mood || null,
       items: o.items.map(i => i.id), explanation: o.explanation, tags: o.tags,
     }).select("id").single();
-    if (error || !created) return toast.error("Could not save");
+    if (error || !created) return toast.error("Не удалось сохранить");
     await supabase.from("outfit_saves").insert({ user_id: user.id, outfit_id: created.id });
-    toast.success("Saved to Lookbook");
+    toast.success("Сохранено в Лукбук");
   };
 
   return (
@@ -112,18 +112,18 @@ function Results() {
       <div className="px-5 pt-6 pb-3 flex items-center gap-3">
         <button onClick={() => navigate({ to: "/outfits" })} className="w-9 h-9 rounded-full bg-card flex items-center justify-center"><ArrowLeft size={18} /></button>
         <div>
-          <h1 className="font-serif text-3xl">Your Outfits</h1>
+          <h1 className="font-serif text-3xl">Ваши образы</h1>
           <div className="text-sm text-accent">{occasion} · {weather}{mood && ` · ${mood}`}</div>
         </div>
       </div>
 
       <div className="px-5 mt-4 space-y-5">
         {loading ? (
-          <div className="text-center py-12 text-muted-foreground">Styling…</div>
+          <div className="text-center py-12 text-muted-foreground">Подбираем образы…</div>
         ) : outfits.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground mb-4">Add at least 2 pieces to your wardrobe first.</p>
-            <Link to="/wardrobe/add" className="btn-primary">Add items</Link>
+            <p className="text-muted-foreground mb-4">Сначала добавьте минимум 2 вещи в гардероб.</p>
+            <Link to="/wardrobe/add" className="btn-primary">Добавить вещи</Link>
           </div>
         ) : outfits.map((o, idx) => (
           <article key={idx} className="card-soft p-5" style={{ borderRadius: 20 }}>
@@ -144,14 +144,14 @@ function Results() {
               {o.tags.map(t => <span key={t} className="chip">{t}</span>)}
             </div>
             <div className="flex gap-2 mt-4">
-              <button onClick={() => save(o)} className="btn-outline flex-1"><Bookmark size={16} className="mr-1" /> Save</button>
-              <button onClick={() => { navigator.clipboard?.writeText(o.name); toast.success("Copied"); }} className="btn-outline flex-1"><Share2 size={16} className="mr-1" /> Share</button>
+              <button onClick={() => save(o)} className="btn-outline flex-1"><Bookmark size={16} className="mr-1" /> Сохранить</button>
+              <button onClick={() => { navigator.clipboard?.writeText(o.name); toast.success("Скопировано"); }} className="btn-outline flex-1"><Share2 size={16} className="mr-1" /> Поделиться</button>
             </div>
           </article>
         ))}
 
         {outfits.length > 0 && (
-          <button onClick={() => setReroll(r => r + 1)} className="btn-dark w-full">Generate 3 More</button>
+          <button onClick={() => setReroll(r => r + 1)} className="btn-dark w-full">Сгенерировать ещё</button>
         )}
       </div>
     </AppShell>
