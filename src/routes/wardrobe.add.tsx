@@ -180,7 +180,7 @@ function AddItem() {
             <p className="text-xs text-muted-foreground italic">AI will help auto-fill details — coming soon</p>
 
             <button disabled={busy} onClick={save} className="btn-primary w-full">
-              {busy ? "Saving…" : "Save to Wardrobe"}
+              {busy ? busyLabel : "Save to Wardrobe"}
             </button>
           </div>
         )}
