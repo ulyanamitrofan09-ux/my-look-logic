@@ -144,14 +144,14 @@ function Results() {
               {o.tags.map(t => <span key={t} className="chip">{t}</span>)}
             </div>
             <div className="flex gap-2 mt-4">
-              <button onClick={() => save(o)} className="btn-outline flex-1"><Bookmark size={16} className="mr-1" /> Save</button>
-              <button onClick={() => { navigator.clipboard?.writeText(o.name); toast.success("Copied"); }} className="btn-outline flex-1"><Share2 size={16} className="mr-1" /> Share</button>
+              <button onClick={() => save(o)} className="btn-outline flex-1"><Bookmark size={16} className="mr-1" /> Сохранить</button>
+              <button onClick={() => { navigator.clipboard?.writeText(o.name); toast.success("Скопировано"); }} className="btn-outline flex-1"><Share2 size={16} className="mr-1" /> Поделиться</button>
             </div>
           </article>
         ))}
 
         {outfits.length > 0 && (
-          <button onClick={() => setReroll(r => r + 1)} className="btn-dark w-full">Generate 3 More</button>
+          <button onClick={() => setReroll(r => r + 1)} className="btn-dark w-full">Сгенерировать ещё</button>
         )}
       </div>
     </AppShell>
