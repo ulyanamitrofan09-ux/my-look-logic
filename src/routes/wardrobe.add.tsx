@@ -1,14 +1,34 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { AuthGate } from "@/components/AuthGate";
+import { removeBackground } from "@/lib/removebg.functions";
 
 export const Route = createFileRoute("/wardrobe/add")({
   component: () => <AuthGate><AddItem /></AuthGate>,
 });
+
+const fileToBase64 = (file: Blob): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      resolve(result.split(",")[1] || "");
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+const base64ToBlob = (b64: string, mime: string): Blob => {
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new Blob([bytes], { type: mime });
+};
 
 const TYPES = ["Top", "Bottom", "Dress", "Jumpsuit", "Outerwear", "Shoes", "Bag", "Accessory"];
 const SEASONS = ["Spring/Summer", "Fall/Winter", "Year-round"];
@@ -23,6 +43,7 @@ const SUBTYPE_HINT: Record<string, string> = {
 function AddItem() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const removeBg = useServerFn(removeBackground);
   const fileRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
@@ -33,6 +54,7 @@ function AddItem() {
   const [season, setSeason] = useState<string[]>(["Year-round"]);
   const [formality, setFormality] = useState("Casual");
   const [busy, setBusy] = useState(false);
+  const [busyLabel, setBusyLabel] = useState("Saving…");
 
   const onFile = (f: File) => {
     if (f.size > 10 * 1024 * 1024) return toast.error("Max 10MB");
@@ -48,9 +70,25 @@ function AddItem() {
     if (!user || !file) return toast.error("Add a photo first");
     setBusy(true);
     try {
-      const ext = file.name.split(".").pop() || "jpg";
+      // 1. Try Remove.bg → fall back silently to original on failure
+      setBusyLabel("Removing background...");
+      let uploadBlob: Blob = file;
+      let ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      try {
+        const imageBase64 = await fileToBase64(file);
+        const { pngBase64 } = await removeBg({ data: { imageBase64, filename: file.name } });
+        uploadBlob = base64ToBlob(pngBase64, "image/png");
+        ext = "png";
+      } catch (e) {
+        console.warn("remove.bg failed, using original", e);
+      }
+
+      // 2. Upload to storage
+      setBusyLabel("Saving…");
       const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("wardrobe-items").upload(path, file);
+      const { error: upErr } = await supabase.storage
+        .from("wardrobe-items")
+        .upload(path, uploadBlob, { contentType: ext === "png" ? "image/png" : file.type });
       if (upErr) throw upErr;
       const { data: { publicUrl } } = supabase.storage.from("wardrobe-items").getPublicUrl(path);
 
@@ -66,6 +104,7 @@ function AddItem() {
       toast.error(e.message || "Could not save");
     } finally {
       setBusy(false);
+      setBusyLabel("Saving…");
     }
   };
 
@@ -84,7 +123,7 @@ function AddItem() {
           className="w-full aspect-square card-soft border-2 border-dashed border-border flex flex-col items-center justify-center gap-3 overflow-hidden">
           {preview ? (
             <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: "#FFFFFF", padding: 8, minHeight: 180 }}>
-              <img src={preview} alt="preview" style={{ objectFit: "contain", maxHeight: 160, width: "100%", mixBlendMode: "multiply" }} />
+              <img src={preview} alt="preview" style={{ objectFit: "contain", maxHeight: 160, width: "100%" }} />
             </div>
           ) : (
             <>
@@ -141,7 +180,7 @@ function AddItem() {
             <p className="text-xs text-muted-foreground italic">AI will help auto-fill details — coming soon</p>
 
             <button disabled={busy} onClick={save} className="btn-primary w-full">
-              {busy ? "Saving…" : "Save to Wardrobe"}
+              {busy ? busyLabel : "Save to Wardrobe"}
             </button>
           </div>
         )}
