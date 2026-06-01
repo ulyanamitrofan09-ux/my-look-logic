@@ -112,7 +112,7 @@ function Results() {
       <div className="px-5 pt-6 pb-3 flex items-center gap-3">
         <button onClick={() => navigate({ to: "/outfits" })} className="w-9 h-9 rounded-full bg-card flex items-center justify-center"><ArrowLeft size={18} /></button>
         <div>
-          <h1 className="font-serif text-3xl">Your Outfits</h1>
+          <h1 className="font-serif text-3xl">Ваши образы</h1>
           <div className="text-sm text-accent">{occasion} · {weather}{mood && ` · ${mood}`}</div>
         </div>
       </div>
