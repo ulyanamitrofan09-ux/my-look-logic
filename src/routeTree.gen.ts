@@ -9,38 +9,174 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as LookbookRouteImport } from './routes/lookbook'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as WardrobeIndexRouteImport } from './routes/wardrobe.index'
+import { Route as OutfitsIndexRouteImport } from './routes/outfits.index'
+import { Route as WardrobeAddRouteImport } from './routes/wardrobe.add'
+import { Route as OutfitsResultsRouteImport } from './routes/outfits.results'
 
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LookbookRoute = LookbookRouteImport.update({
+  id: '/lookbook',
+  path: '/lookbook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WardrobeIndexRoute = WardrobeIndexRouteImport.update({
+  id: '/wardrobe/',
+  path: '/wardrobe/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OutfitsIndexRoute = OutfitsIndexRouteImport.update({
+  id: '/outfits/',
+  path: '/outfits/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WardrobeAddRoute = WardrobeAddRouteImport.update({
+  id: '/wardrobe/add',
+  path: '/wardrobe/add',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OutfitsResultsRoute = OutfitsResultsRouteImport.update({
+  id: '/outfits/results',
+  path: '/outfits/results',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/lookbook': typeof LookbookRoute
+  '/onboarding': typeof OnboardingRoute
+  '/profile': typeof ProfileRoute
+  '/outfits/results': typeof OutfitsResultsRoute
+  '/wardrobe/add': typeof WardrobeAddRoute
+  '/outfits/': typeof OutfitsIndexRoute
+  '/wardrobe/': typeof WardrobeIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/lookbook': typeof LookbookRoute
+  '/onboarding': typeof OnboardingRoute
+  '/profile': typeof ProfileRoute
+  '/outfits/results': typeof OutfitsResultsRoute
+  '/wardrobe/add': typeof WardrobeAddRoute
+  '/outfits': typeof OutfitsIndexRoute
+  '/wardrobe': typeof WardrobeIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/lookbook': typeof LookbookRoute
+  '/onboarding': typeof OnboardingRoute
+  '/profile': typeof ProfileRoute
+  '/outfits/results': typeof OutfitsResultsRoute
+  '/wardrobe/add': typeof WardrobeAddRoute
+  '/outfits/': typeof OutfitsIndexRoute
+  '/wardrobe/': typeof WardrobeIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/lookbook'
+    | '/onboarding'
+    | '/profile'
+    | '/outfits/results'
+    | '/wardrobe/add'
+    | '/outfits/'
+    | '/wardrobe/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/lookbook'
+    | '/onboarding'
+    | '/profile'
+    | '/outfits/results'
+    | '/wardrobe/add'
+    | '/outfits'
+    | '/wardrobe'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/lookbook'
+    | '/onboarding'
+    | '/profile'
+    | '/outfits/results'
+    | '/wardrobe/add'
+    | '/outfits/'
+    | '/wardrobe/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
+  LookbookRoute: typeof LookbookRoute
+  OnboardingRoute: typeof OnboardingRoute
+  ProfileRoute: typeof ProfileRoute
+  OutfitsResultsRoute: typeof OutfitsResultsRoute
+  WardrobeAddRoute: typeof WardrobeAddRoute
+  OutfitsIndexRoute: typeof OutfitsIndexRoute
+  WardrobeIndexRoute: typeof WardrobeIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lookbook': {
+      id: '/lookbook'
+      path: '/lookbook'
+      fullPath: '/lookbook'
+      preLoaderRoute: typeof LookbookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +184,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/wardrobe/': {
+      id: '/wardrobe/'
+      path: '/wardrobe'
+      fullPath: '/wardrobe/'
+      preLoaderRoute: typeof WardrobeIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/outfits/': {
+      id: '/outfits/'
+      path: '/outfits'
+      fullPath: '/outfits/'
+      preLoaderRoute: typeof OutfitsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/wardrobe/add': {
+      id: '/wardrobe/add'
+      path: '/wardrobe/add'
+      fullPath: '/wardrobe/add'
+      preLoaderRoute: typeof WardrobeAddRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/outfits/results': {
+      id: '/outfits/results'
+      path: '/outfits/results'
+      fullPath: '/outfits/results'
+      preLoaderRoute: typeof OutfitsResultsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
+  LookbookRoute: LookbookRoute,
+  OnboardingRoute: OnboardingRoute,
+  ProfileRoute: ProfileRoute,
+  OutfitsResultsRoute: OutfitsResultsRoute,
+  WardrobeAddRoute: WardrobeAddRoute,
+  OutfitsIndexRoute: OutfitsIndexRoute,
+  WardrobeIndexRoute: WardrobeIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
