@@ -102,9 +102,9 @@ function Results() {
       user_id: user.id, name: o.name, occasion, weather, mood: mood || null,
       items: o.items.map(i => i.id), explanation: o.explanation, tags: o.tags,
     }).select("id").single();
-    if (error || !created) return toast.error("Could not save");
+    if (error || !created) return toast.error("Не удалось сохранить");
     await supabase.from("outfit_saves").insert({ user_id: user.id, outfit_id: created.id });
-    toast.success("Saved to Lookbook");
+    toast.success("Сохранено в Лукбук");
   };
 
   return (
