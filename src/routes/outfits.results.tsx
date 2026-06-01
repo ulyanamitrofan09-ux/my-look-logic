@@ -119,11 +119,11 @@ function Results() {
 
       <div className="px-5 mt-4 space-y-5">
         {loading ? (
-          <div className="text-center py-12 text-muted-foreground">Styling…</div>
+          <div className="text-center py-12 text-muted-foreground">Подбираем образы…</div>
         ) : outfits.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground mb-4">Add at least 2 pieces to your wardrobe first.</p>
-            <Link to="/wardrobe/add" className="btn-primary">Add items</Link>
+            <p className="text-muted-foreground mb-4">Сначала добавьте минимум 2 вещи в гардероб.</p>
+            <Link to="/wardrobe/add" className="btn-primary">Добавить вещи</Link>
           </div>
         ) : outfits.map((o, idx) => (
           <article key={idx} className="card-soft p-5" style={{ borderRadius: 20 }}>
