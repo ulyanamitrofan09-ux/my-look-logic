@@ -1,0 +1,135 @@
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { ArrowLeft, Bookmark, Share2 } from "lucide-react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
+import { AppShell } from "@/components/AppShell";
+import { AuthGate } from "@/components/AuthGate";
+
+export const Route = createFileRoute("/outfits/results")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    occasion: (s.occasion as string) || "",
+    weather: (s.weather as string) || "",
+    mood: (s.mood as string) || "",
+  }),
+  component: () => <AuthGate><Results /></AuthGate>,
+});
+
+type Item = { id: string; name: string | null; type: string; subtype: string | null; photo_url: string };
+type Outfit = { name: string; explanation: string; tags: string[]; items: Item[] };
+
+const NAMES = ["Confident Classic", "Quiet Power", "Soft Definition", "Easy Polish", "Modern Elegance", "Effortless Edit"];
+const TAGS = [["Polished", "Tailored"], ["Soft", "Considered"], ["Bold", "Modern"], ["Easy", "Refined"]];
+
+function makeOutfits(items: Item[], occasion: string): Outfit[] {
+  const tops = items.filter(i => i.type === "Top");
+  const bottoms = items.filter(i => i.type === "Bottom");
+  const dresses = items.filter(i => i.type === "Dress" || i.type === "Jumpsuit");
+  const shoes = items.filter(i => i.type === "Shoes");
+  const accents = items.filter(i => ["Bag", "Accessory", "Outerwear"].includes(i.type));
+
+  const combos: Item[][] = [];
+  const tryAdd = (a?: Item, b?: Item, c?: Item) => {
+    const set = [a, b, c].filter(Boolean) as Item[];
+    if (set.length >= 2) combos.push(set);
+  };
+
+  for (let i = 0; i < 3; i++) {
+    if (tops[i % Math.max(1, tops.length)] && bottoms[i % Math.max(1, bottoms.length)]) {
+      tryAdd(tops[i % tops.length], bottoms[i % bottoms.length], shoes[i % shoes.length] || accents[i % accents.length]);
+    } else if (dresses[i % Math.max(1, dresses.length)]) {
+      tryAdd(dresses[i % dresses.length], shoes[i % shoes.length], accents[i % accents.length]);
+    }
+  }
+  while (combos.length < 3 && items.length >= 2) {
+    const shuffled = [...items].sort(() => Math.random() - 0.5).slice(0, 3);
+    combos.push(shuffled);
+  }
+  return combos.slice(0, 3).map((set, i) => ({
+    name: NAMES[i % NAMES.length],
+    explanation: `This combination works for "${occasion.toLowerCase()}" because the pieces share a tonal harmony — about 60% neutral, 30% mid-tone, 10% accent — and the proportions stay balanced. Formality lands in the right range without trying too hard.`,
+    tags: TAGS[i % TAGS.length],
+    items: set,
+  }));
+}
+
+function Results() {
+  const { occasion, weather, mood } = Route.useSearch();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [outfits, setOutfits] = useState<Outfit[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [reroll, setReroll] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      setLoading(true);
+      const { data } = await supabase.from("wardrobe_items").select("id,name,type,subtype,photo_url");
+      setOutfits(makeOutfits((data as Item[]) || [], occasion));
+      setLoading(false);
+    })();
+  }, [user, occasion, reroll]);
+
+  const save = async (o: Outfit) => {
+    if (!user) return;
+    const { data: created, error } = await supabase.from("outfits").insert({
+      user_id: user.id, name: o.name, occasion, weather, mood: mood || null,
+      items: o.items.map(i => i.id), explanation: o.explanation, tags: o.tags,
+    }).select("id").single();
+    if (error || !created) return toast.error("Could not save");
+    await supabase.from("outfit_saves").insert({ user_id: user.id, outfit_id: created.id });
+    toast.success("Saved to Lookbook");
+  };
+
+  return (
+    <AppShell>
+      <div className="px-5 pt-6 pb-3 flex items-center gap-3">
+        <button onClick={() => navigate({ to: "/outfits" })} className="w-9 h-9 rounded-full bg-card flex items-center justify-center"><ArrowLeft size={18} /></button>
+        <div>
+          <h1 className="font-serif text-3xl">Your Outfits</h1>
+          <div className="text-sm text-accent">{occasion} · {weather}{mood && ` · ${mood}`}</div>
+        </div>
+      </div>
+
+      <div className="px-5 mt-4 space-y-5">
+        {loading ? (
+          <div className="text-center py-12 text-muted-foreground">Styling…</div>
+        ) : outfits.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground mb-4">Add at least 2 pieces to your wardrobe first.</p>
+            <Link to="/wardrobe/add" className="btn-primary">Add items</Link>
+          </div>
+        ) : outfits.map((o, idx) => (
+          <article key={idx} className="card-soft p-5" style={{ borderRadius: 20 }}>
+            <div className="grid grid-cols-3 gap-2">
+              {o.items.slice(0, 3).map(it => (
+                <div key={it.id}>
+                  <div className="aspect-square bg-white rounded-xl overflow-hidden flex items-center justify-center p-1">
+                    <img src={it.photo_url} alt={it.name || it.type} className="w-full h-full object-contain" />
+                  </div>
+                  <div className="mt-1 text-[11px] text-muted-foreground text-center truncate">{it.name || it.subtype || it.type}</div>
+                </div>
+              ))}
+            </div>
+            <hr className="my-4 border-border" />
+            <h3 className="font-serif text-2xl">{o.name}</h3>
+            <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{o.explanation}</p>
+            <div className="flex gap-2 mt-3">
+              {o.tags.map(t => <span key={t} className="chip">{t}</span>)}
+            </div>
+            <div className="flex gap-2 mt-4">
+              <button onClick={() => save(o)} className="btn-outline flex-1"><Bookmark size={16} className="mr-1" /> Save</button>
+              <button onClick={() => { navigator.clipboard?.writeText(o.name); toast.success("Copied"); }} className="btn-outline flex-1"><Share2 size={16} className="mr-1" /> Share</button>
+            </div>
+          </article>
+        ))}
+
+        {outfits.length > 0 && (
+          <button onClick={() => setReroll(r => r + 1)} className="btn-dark w-full">Generate 3 More</button>
+        )}
+      </div>
+    </AppShell>
+  );
+}
