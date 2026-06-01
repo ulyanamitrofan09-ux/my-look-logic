@@ -19,8 +19,8 @@ export const Route = createFileRoute("/outfits/results")({
 type Item = { id: string; name: string | null; type: string; subtype: string | null; photo_url: string };
 type Outfit = { name: string; explanation: string; tags: string[]; items: Item[] };
 
-const NAMES = ["Confident Classic", "Quiet Power", "Soft Definition", "Easy Polish", "Modern Elegance", "Effortless Edit"];
-const TAGS = [["Polished", "Tailored"], ["Soft", "Considered"], ["Bold", "Modern"], ["Easy", "Refined"]];
+const NAMES = ["Уверенная классика", "Тихая сила", "Мягкие акценты", "Лёгкая элегантность", "Современный шик", "Непринуждённый образ"];
+const TAGS = [["Утончённый", "По фигуре"], ["Мягкий", "Продуманный"], ["Смелый", "Современный"], ["Лёгкий", "Изысканный"]];
 
 function makeOutfits(items: Item[], occasion: string): Outfit[] {
   const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
