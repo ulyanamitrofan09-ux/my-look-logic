@@ -31,35 +31,42 @@ const FALLBACK_PALETTES = [
 ];
 
 async function extractColors(url: string): Promise<string[]> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-      try {
-        const size = 80;
-        const canvas = document.createElement("canvas");
-        canvas.width = size; canvas.height = size;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) { resolve([]); return; }
-        ctx.drawImage(img, 0, 0, size, size);
-        const { data } = ctx.getImageData(0, 0, size, size);
-        const map = new Map<string, { r: number; g: number; b: number; n: number }>();
-        for (let i = 0; i < data.length; i += 4) {
-          const [r, g, b, a] = [data[i], data[i + 1], data[i + 2], data[i + 3]];
-          if (a < 100) continue;
-          if (r + g + b > 758 || r + g + b < 30) continue;
-          const key = `${Math.round(r / 30) * 30},${Math.round(g / 30) * 30},${Math.round(b / 30) * 30}`;
-          const e = map.get(key);
-          if (e) { e.r += r; e.g += g; e.b += b; e.n++; }
-          else map.set(key, { r, g, b, n: 1 });
-        }
-        const top = [...map.values()].sort((a, b) => b.n - a.n).slice(0, 5);
-        resolve(top.map(c => `rgb(${Math.round(c.r / c.n)},${Math.round(c.g / c.n)},${Math.round(c.b / c.n)})`));
-      } catch { resolve([]); }
-    };
-    img.onerror = () => resolve([]);
-    img.src = url;
-  });
+  try {
+    // Fetch via blob to avoid CORS canvas taint issues
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const objectUrl = URL.createObjectURL(blob);
+
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        try {
+          const size = 80;
+          const canvas = document.createElement("canvas");
+          canvas.width = size; canvas.height = size;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) { resolve([]); return; }
+          ctx.drawImage(img, 0, 0, size, size);
+          const { data } = ctx.getImageData(0, 0, size, size);
+          const map = new Map<string, { r: number; g: number; b: number; n: number }>();
+          for (let i = 0; i < data.length; i += 4) {
+            const [r, g, b, a] = [data[i], data[i + 1], data[i + 2], data[i + 3]];
+            if (a < 80) continue;
+            if (r + g + b > 758 || r + g + b < 30) continue;
+            const key = `${Math.round(r / 25) * 25},${Math.round(g / 25) * 25},${Math.round(b / 25) * 25}`;
+            const e = map.get(key);
+            if (e) { e.r += r; e.g += g; e.b += b; e.n++; }
+            else map.set(key, { r, g, b, n: 1 });
+          }
+          const top = [...map.values()].sort((a, b) => b.n - a.n).slice(0, 5);
+          resolve(top.map(c => `rgb(${Math.round(c.r / c.n)},${Math.round(c.g / c.n)},${Math.round(c.b / c.n)})`));
+        } catch { URL.revokeObjectURL(objectUrl); resolve([]); }
+      };
+      img.onerror = () => { URL.revokeObjectURL(objectUrl); resolve([]); };
+      img.src = objectUrl;
+    });
+  } catch { return []; }
 }
 
 async function buildPalette(items: Item[], fallbackIdx: number): Promise<string[]> {
