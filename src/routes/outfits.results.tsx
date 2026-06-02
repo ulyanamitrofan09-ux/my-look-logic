@@ -119,18 +119,14 @@ const BOTTOM_TYPES = ["Bottom"];
 // Reference layout: top garment left-center (front), bottom garment right (back), accent bottom-center
 function getItemStyle(item: Item, allItems: Item[]): React.CSSProperties {
   const hasTop = allItems.some(i => TOP_TYPES.includes(i.type));
-  const hasBottom = allItems.some(i => BOTTOM_TYPES.includes(i.type));
 
   if (TOP_TYPES.includes(item.type)) {
-    // Top garment: left side, from top, in front
-    return { position: "absolute", top: "2%", left: "2%", width: "66%", zIndex: 3 };
+    return { position: "absolute", top: "2%", left: "2%", width: "68%", zIndex: 3 };
   }
   if (BOTTOM_TYPES.includes(item.type)) {
-    // Bottom garment: right side, full height, behind top
-    return { position: "absolute", top: hasTop ? "18%" : "2%", right: "0%", width: "66%", zIndex: hasTop ? 2 : 3 };
+    return { position: "absolute", top: hasTop ? "20%" : "2%", right: "0%", width: "68%", zIndex: hasTop ? 2 : 3 };
   }
-  // Accent (shoes/bag/accessory): lower area, in front
-  return { position: "absolute", bottom: "2%", left: "8%", width: "52%", zIndex: 4 };
+  return { position: "absolute", bottom: "2%", left: "6%", width: "54%", zIndex: 4 };
 }
 
 function OutfitCard({ outfit, index, onSave }: { outfit: Outfit; index: number; onSave: () => void }) {
