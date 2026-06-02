@@ -45,16 +45,16 @@ async function extractColors(url: string): Promise<string[]> {
         const { data } = ctx.getImageData(0, 0, size, size);
         const map = new Map<string, { r: number; g: number; b: number; n: number }>();
         for (let i = 0; i < data.length; i += 4) {
-          const [r, g, b, a] = [data[i], data[i+1], data[i+2], data[i+3]];
+          const [r, g, b, a] = [data[i], data[i + 1], data[i + 2], data[i + 3]];
           if (a < 100) continue;
           if (r + g + b > 758 || r + g + b < 30) continue;
-          const key = `${Math.round(r/30)*30},${Math.round(g/30)*30},${Math.round(b/30)*30}`;
+          const key = `${Math.round(r / 30) * 30},${Math.round(g / 30) * 30},${Math.round(b / 30) * 30}`;
           const e = map.get(key);
           if (e) { e.r += r; e.g += g; e.b += b; e.n++; }
           else map.set(key, { r, g, b, n: 1 });
         }
         const top = [...map.values()].sort((a, b) => b.n - a.n).slice(0, 5);
-        resolve(top.map(c => `rgb(${Math.round(c.r/c.n)},${Math.round(c.g/c.n)},${Math.round(c.b/c.n)})`));
+        resolve(top.map(c => `rgb(${Math.round(c.r / c.n)},${Math.round(c.g / c.n)},${Math.round(c.b / c.n)})`));
       } catch { resolve([]); }
     };
     img.onerror = () => resolve([]);
@@ -112,12 +112,26 @@ function makeOutfits(items: Item[], occasion: string): Outfit[] {
   }));
 }
 
-// Overlap config per item index: [maxHeight px, marginTop px, slight x-offset]
-const ITEM_CONFIG = [
-  { maxHeight: 230, marginTop: 0,   marginLeft: "auto", marginRight: "10%" },
-  { maxHeight: 230, marginTop: -75, marginLeft: "10%",  marginRight: "auto" },
-  { maxHeight: 170, marginTop: -55, marginLeft: "auto", marginRight: "15%" },
-];
+const TOP_TYPES = ["Top", "Outerwear", "Dress", "Jumpsuit"];
+const BOTTOM_TYPES = ["Bottom"];
+
+// Returns absolute positioning style for each item based on its clothing type
+// Reference layout: top garment left-center (front), bottom garment right (back), accent bottom-center
+function getItemStyle(item: Item, allItems: Item[]): React.CSSProperties {
+  const hasTop = allItems.some(i => TOP_TYPES.includes(i.type));
+  const hasBottom = allItems.some(i => BOTTOM_TYPES.includes(i.type));
+
+  if (TOP_TYPES.includes(item.type)) {
+    // Top garment: left side, from top, in front
+    return { position: "absolute", top: "2%", left: "2%", width: "66%", zIndex: 3 };
+  }
+  if (BOTTOM_TYPES.includes(item.type)) {
+    // Bottom garment: right side, full height, behind top
+    return { position: "absolute", top: hasTop ? "18%" : "2%", right: "0%", width: "66%", zIndex: hasTop ? 2 : 3 };
+  }
+  // Accent (shoes/bag/accessory): lower area, in front
+  return { position: "absolute", bottom: "2%", left: "8%", width: "52%", zIndex: 4 };
+}
 
 function OutfitCard({ outfit, index, onSave }: { outfit: Outfit; index: number; onSave: () => void }) {
   const [palette, setPalette] = useState<string[]>(FALLBACK_PALETTES[index % FALLBACK_PALETTES.length]);
@@ -130,49 +144,36 @@ function OutfitCard({ outfit, index, onSave }: { outfit: Outfit; index: number; 
 
   return (
     <article style={{ borderRadius: 20, overflow: "hidden", background: "#F7F3EE", boxShadow: "0 4px 24px rgba(0,0,0,0.09)" }}>
-      <div style={{ display: "flex" }}>
+      <div style={{ display: "flex", height: 420 }}>
 
-        {/* Left: number + name + palette */}
-        <div style={{ width: 110, flexShrink: 0, padding: "20px 10px 20px 18px", display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 400 }}>
+        {/* Left panel: number + name + palette swatches */}
+        <div style={{
+          width: 115, flexShrink: 0,
+          padding: "20px 10px 20px 18px",
+          display: "flex", flexDirection: "column", justifyContent: "space-between",
+        }}>
           <div>
-            <div style={{ fontFamily: "Cormorant Garamond, Georgia, serif", fontSize: 11, color: "#8C7B70", letterSpacing: "0.1em", marginBottom: 3 }}>{num}</div>
-            <div style={{ fontFamily: "Cormorant Garamond, Georgia, serif", fontSize: 15, fontWeight: 600, lineHeight: 1.2, color: "#1C1C1C" }}>{outfit.name}</div>
+            <div style={{ fontFamily: "Cormorant Garamond, Georgia, serif", fontSize: 11, color: "#8C7B70", letterSpacing: "0.12em" }}>{num}</div>
+            <div style={{ fontFamily: "Cormorant Garamond, Georgia, serif", fontSize: 15, fontWeight: 600, lineHeight: 1.25, color: "#1C1C1C", marginTop: 4 }}>{outfit.name}</div>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
             {palette.map((color, i) => (
-              <div key={i} style={{ height: 32, borderRadius: 9, background: color, border: "1px solid rgba(0,0,0,0.07)" }} />
+              <div key={i} style={{ height: 33, borderRadius: 9, background: color, border: "1px solid rgba(0,0,0,0.08)" }} />
             ))}
           </div>
         </div>
 
-        {/* Right: ghost mannequin collage */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", paddingTop: 16, paddingBottom: 8, overflow: "hidden" }}>
-          {outfit.items.slice(0, 3).map((item, i) => {
-            const cfg = ITEM_CONFIG[i] ?? ITEM_CONFIG[2];
-            return (
-              <div key={item.id} style={{
-                marginTop: cfg.marginTop,
-                marginLeft: cfg.marginLeft,
-                marginRight: cfg.marginRight,
-                width: "85%",
-                zIndex: outfit.items.length - i,
-                position: "relative",
-              }}>
-                <img
-                  src={item.photo_url}
-                  alt={item.name || item.type}
-                  style={{
-                    width: "100%",
-                    maxHeight: cfg.maxHeight,
-                    objectFit: "contain",
-                    objectPosition: "center top",
-                    display: "block",
-                    filter: "drop-shadow(0px 4px 10px rgba(0,0,0,0.13))",
-                  }}
-                />
-              </div>
-            );
-          })}
+        {/* Right panel: fashion flat lay collage */}
+        <div style={{ flex: 1, position: "relative", overflow: "hidden" }}>
+          {outfit.items.map((item) => (
+            <div key={item.id} style={getItemStyle(item, outfit.items)}>
+              <img
+                src={item.photo_url}
+                alt={item.name || item.type}
+                style={{ width: "100%", objectFit: "contain", display: "block" }}
+              />
+            </div>
+          ))}
         </div>
       </div>
 
@@ -249,7 +250,6 @@ function Results() {
         ) : outfits.map((o, idx) => (
           <OutfitCard key={idx} outfit={o} index={idx} onSave={() => save(o)} />
         ))}
-
         {outfits.length > 0 && (
           <button onClick={() => setReroll(r => r + 1)} className="btn-dark w-full">Сгенерировать ещё</button>
         )}
