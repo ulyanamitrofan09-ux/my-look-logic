@@ -9,6 +9,13 @@ export const Route = createFileRoute("/lookbook")({
   component: () => <AuthGate><Lookbook /></AuthGate>,
 });
 
+function plural(n: number, one: string, few: string, many: string) {
+  const mod10 = n % 10, mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return one;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return few;
+  return many;
+}
+
 function Lookbook() {
   const { user } = useAuth();
   const [outfits, setOutfits] = useState<any[]>([]);
@@ -33,16 +40,16 @@ function Lookbook() {
   return (
     <AppShell>
       <div className="px-5 pt-6 pb-2">
-        <h1 className="font-serif text-3xl">Lookbook</h1>
-        <p className="text-sm text-muted-foreground mt-1">{outfits.length} saved outfit{outfits.length === 1 ? "" : "s"}</p>
+        <h1 className="font-serif text-3xl">Лукбук</h1>
+        <p className="text-sm text-muted-foreground mt-1">{outfits.length} {plural(outfits.length, "сохранённый образ", "сохранённых образа", "сохранённых образов")}</p>
       </div>
       <div className="px-5 mt-4">
         {loading ? (
-          <div className="text-center text-muted-foreground py-12">Loading…</div>
+          <div className="text-center text-muted-foreground py-12">Загрузка…</div>
         ) : outfits.length === 0 ? (
           <div className="text-center py-20">
-            <h3 className="font-serif text-2xl mb-1">No looks yet</h3>
-            <p className="text-muted-foreground">Save your first outfit to start your Lookbook</p>
+            <h3 className="font-serif text-2xl mb-1">Пока нет образов</h3>
+            <p className="text-muted-foreground">Сохраните первый образ, чтобы начать Лукбук</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
@@ -58,7 +65,7 @@ function Lookbook() {
                 <div className="mt-3">
                   <div className="text-xs text-accent">{o.occasion}</div>
                   <div className="text-sm font-medium truncate">{o.name}</div>
-                  <div className="text-[11px] text-muted-foreground">{new Date(o.created_at).toLocaleDateString()}</div>
+                  <div className="text-[11px] text-muted-foreground">{new Date(o.created_at).toLocaleDateString("ru-RU")}</div>
                 </div>
               </div>
             ))}

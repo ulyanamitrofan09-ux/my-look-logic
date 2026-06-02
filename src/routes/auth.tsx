@@ -28,16 +28,16 @@ function AuthPage() {
           options: { data: { name }, emailRedirectTo: window.location.origin + "/wardrobe" },
         });
         if (error) throw error;
-        toast.success("Welcome to Flair!");
+        toast.success("Добро пожаловать в Flair!");
         navigate({ to: "/onboarding" });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        toast.success("Welcome back");
+        toast.success("С возвращением");
         navigate({ to: "/wardrobe" });
       }
     } catch (err: any) {
-      toast.error(err.message || "Something went wrong");
+      toast.error(err.message || "Что-то пошло не так");
     } finally {
       setBusy(false);
     }
@@ -46,10 +46,10 @@ function AuthPage() {
   const google = async () => {
     try {
       const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/wardrobe" });
-      if (result?.error) toast.error("Google sign-in failed");
+      if (result?.error) toast.error("Не удалось войти через Google");
       else if (!result?.redirected) navigate({ to: "/wardrobe" });
     } catch {
-      toast.error("Google sign-in unavailable");
+      toast.error("Вход через Google недоступен");
     }
   };
 
@@ -64,27 +64,27 @@ function AuthPage() {
             {(["signup", "signin"] as const).map((m) => (
               <button key={m} onClick={() => setMode(m)}
                 className={`py-2 rounded-full text-sm font-medium transition ${mode === m ? "bg-card shadow-sm" : "text-muted-foreground"}`}>
-                {m === "signup" ? "Sign Up" : "Sign In"}
+                {m === "signup" ? "Регистрация" : "Вход"}
               </button>
             ))}
           </div>
 
           <form onSubmit={submit} className="space-y-3">
             {mode === "signup" && (
-              <input className="input-field" placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} required />
+              <input className="input-field" placeholder="Ваше имя" value={name} onChange={(e) => setName(e.target.value)} required />
             )}
             <input className="input-field" type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            <input className="input-field" type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+            <input className="input-field" type="password" placeholder="Пароль" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
             <button disabled={busy} type="submit" className="btn-primary w-full">
-              {busy ? "…" : mode === "signup" ? "Create account" : "Sign in"}
+              {busy ? "…" : mode === "signup" ? "Создать аккаунт" : "Войти"}
             </button>
           </form>
 
           <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
-            <div className="flex-1 h-px bg-border" /> OR <div className="flex-1 h-px bg-border" />
+            <div className="flex-1 h-px bg-border" /> ИЛИ <div className="flex-1 h-px bg-border" />
           </div>
 
-          <button onClick={google} className="btn-outline w-full">Continue with Google</button>
+          <button onClick={google} className="btn-outline w-full">Продолжить с Google</button>
         </div>
       </div>
     </div>
