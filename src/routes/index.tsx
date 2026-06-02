@@ -6,10 +6,10 @@ import { useAuth } from "@/lib/auth";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Flair — Your AI Wardrobe Stylist" },
-      { name: "description", content: "AI stylist that picks outfits from your own clothes and explains why they work." },
-      { property: "og:title", content: "Flair — Your AI Wardrobe Stylist" },
-      { property: "og:description", content: "Outfits that make sense, from the clothes you already own." },
+      { title: "Flair — ваш ИИ-стилист гардероба" },
+      { name: "description", content: "ИИ-стилист, который собирает образы из вашей одежды и объясняет, почему они работают." },
+      { property: "og:title", content: "Flair — ваш ИИ-стилист гардероба" },
+      { property: "og:description", content: "Осмысленные образы из вещей, которые у вас уже есть." },
     ],
   }),
   component: Landing,
@@ -36,35 +36,35 @@ function Landing() {
         {/* Nav */}
         <header className="flex items-center justify-between py-6">
           <span className="font-serif text-2xl tracking-tight">Flair</span>
-          <Link to="/auth" className="text-sm hover:text-accent">Sign In</Link>
+          <Link to="/auth" className="text-sm hover:text-accent">Войти</Link>
         </header>
 
         {/* Hero */}
         <section className="min-h-[85vh] flex flex-col justify-center max-w-2xl mx-auto text-center py-20">
           <h1 className="font-serif text-5xl md:text-6xl leading-[1.05] tracking-tight">
-            Your wardrobe.<br />
-            <span className="italic text-accent">Outfits that make sense.</span>
+            Ваш гардероб.<br />
+            <span className="italic text-accent">Осмысленные образы.</span>
           </h1>
           <p className="mt-6 text-lg text-muted-foreground max-w-lg mx-auto">
-            AI stylist that picks outfits from YOUR clothes and explains exactly why they work.
+            ИИ-стилист, который собирает образы из ВАШЕЙ одежды и точно объясняет, почему они работают.
           </p>
           <form onSubmit={goAuth} className="mt-10 flex flex-col sm:flex-row gap-3 max-w-md mx-auto w-full">
             <input
               type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
               placeholder="you@email.com" className="input-field flex-1"
             />
-            <button type="submit" className="btn-primary whitespace-nowrap">Get Early Access</button>
+            <button type="submit" className="btn-primary whitespace-nowrap">Получить ранний доступ</button>
           </form>
-          <p className="mt-3 text-xs text-muted-foreground">Free to start · No credit card needed</p>
+          <p className="mt-3 text-xs text-muted-foreground">Бесплатно для начала · Без карты</p>
         </section>
 
         {/* How it works */}
         <section className="py-20">
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { Icon: Upload, title: "Add your clothes", body: "Photo by photo, we build your digital wardrobe." },
-              { Icon: Calendar, title: "Choose the occasion", body: "Work, date, wedding, travel — you pick it." },
-              { Icon: Sparkles, title: "Get outfits + why they work", body: "Not just combinations. Real styling explanations." },
+              { Icon: Upload, title: "Добавьте одежду", body: "Фото за фото — мы соберём ваш цифровой гардероб." },
+              { Icon: Calendar, title: "Выберите повод", body: "Работа, свидание, свадьба, путешествие — на ваш выбор." },
+              { Icon: Sparkles, title: "Получите образы и объяснение", body: "Не просто комбинации. Настоящие пояснения стилиста." },
             ].map(({ Icon, title, body }, i) => (
               <div key={i} className="card-soft p-8">
                 <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center mb-5">
@@ -80,16 +80,16 @@ function Landing() {
         {/* Difference */}
         <section className="py-20 max-w-3xl mx-auto">
           <h2 className="font-serif text-4xl md:text-5xl leading-tight">
-            Every outfit comes with an <span className="italic">explanation</span>.
+            К каждому образу — <span className="italic">объяснение</span>.
           </h2>
           <p className="mt-6 text-lg text-muted-foreground">
-            Most apps just shuffle your clothes. Flair tells you WHY each combination works — color harmony, proportions, dress code. Like having a stylist friend on call.
+            Большинство приложений просто перемешивают вещи. Flair объясняет, ПОЧЕМУ комбинация работает — цветовая гармония, пропорции, дресс-код. Как стилист-друг под рукой.
           </p>
           <ul className="mt-8 space-y-3">
             {[
-              "Color theory applied to YOUR wardrobe",
-              "Dress code guidance for every event",
-              "Outfit logic you can actually learn from",
+              "Теория цвета в применении к ВАШЕМУ гардеробу",
+              "Подсказки по дресс-коду для любого события",
+              "Логика образов, которой можно научиться",
             ].map((t) => (
               <li key={t} className="flex items-start gap-3">
                 <span className="mt-1 w-5 h-5 rounded-full bg-success flex items-center justify-center shrink-0">
@@ -105,14 +105,14 @@ function Landing() {
       {/* Dark CTA */}
       <section className="bg-dark text-dark-foreground py-20 mt-10">
         <div className="max-w-xl mx-auto px-6 text-center">
-          <h2 className="font-serif text-4xl md:text-5xl">Join the waitlist.<br />Be first.</h2>
+          <h2 className="font-serif text-4xl md:text-5xl">Запишитесь в лист ожидания.<br />Будьте первыми.</h2>
           <form onSubmit={(e) => { e.preventDefault(); navigate({ to: "/auth", search: { email: email2 } as any }); }} className="mt-8 flex flex-col sm:flex-row gap-3">
             <input
               type="email" required value={email2} onChange={(e) => setEmail2(e.target.value)}
               placeholder="you@email.com"
               className="flex-1 px-5 py-3.5 rounded-full bg-white/10 border border-white/20 text-white placeholder:text-white/50 outline-none focus:border-accent"
             />
-            <button className="btn-primary">Join</button>
+            <button className="btn-primary">Записаться</button>
           </form>
         </div>
       </section>

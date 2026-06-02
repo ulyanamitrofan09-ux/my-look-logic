@@ -12,32 +12,32 @@ export const Route = createFileRoute("/wardrobe/add")({
   component: () => <AuthGate><AddItem /></AuthGate>,
 });
 
-const fileToBase64 = (file: Blob): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      resolve(result.split(",")[1] || "");
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-
-const base64ToBlob = (b64: string, mime: string): Blob => {
-  const binary = atob(b64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return new Blob([bytes], { type: mime });
-};
-
-const TYPES = ["Top", "Bottom", "Dress", "Jumpsuit", "Outerwear", "Shoes", "Bag", "Accessory"];
-const SEASONS = ["Spring/Summer", "Fall/Winter", "Year-round"];
-const FORMALITIES = ["Casual", "Smart Casual", "Business", "Formal"];
+const TYPES = [
+  { id: "Top", label: "Верх" },
+  { id: "Bottom", label: "Низ" },
+  { id: "Dress", label: "Платье" },
+  { id: "Jumpsuit", label: "Комбинезон" },
+  { id: "Outerwear", label: "Верхняя одежда" },
+  { id: "Shoes", label: "Обувь" },
+  { id: "Bag", label: "Сумка" },
+  { id: "Accessory", label: "Аксессуар" },
+];
+const SEASONS = [
+  { id: "Spring/Summer", label: "Весна/Лето" },
+  { id: "Fall/Winter", label: "Осень/Зима" },
+  { id: "Year-round", label: "Круглый год" },
+];
+const FORMALITIES = [
+  { id: "Casual", label: "Кэжуал" },
+  { id: "Smart Casual", label: "Смарт-кэжуал" },
+  { id: "Business", label: "Деловой" },
+  { id: "Formal", label: "Торжественный" },
+];
 
 const SUBTYPE_HINT: Record<string, string> = {
-  Top: "e.g. Linen Blazer", Bottom: "e.g. Wide-leg Trousers", Dress: "e.g. Slip Dress",
-  Jumpsuit: "e.g. Linen Jumpsuit", Outerwear: "e.g. Trench Coat",
-  Shoes: "e.g. Loafers", Bag: "e.g. Tote", Accessory: "e.g. Silk Scarf",
+  Top: "напр. Льняной блейзер", Bottom: "напр. Широкие брюки", Dress: "напр. Платье-комбинация",
+  Jumpsuit: "напр. Льняной комбинезон", Outerwear: "напр. Тренч",
+  Shoes: "напр. Лоферы", Bag: "напр. Тоут", Accessory: "напр. Шёлковый платок",
 };
 
 function AddItem() {
@@ -54,11 +54,11 @@ function AddItem() {
   const [season, setSeason] = useState<string[]>(["Year-round"]);
   const [formality, setFormality] = useState("Casual");
   const [busy, setBusy] = useState(false);
-  const [busyLabel, setBusyLabel] = useState("Saving…");
+  const [busyLabel, setBusyLabel] = useState("Сохранение…");
 
   const onFile = (f: File) => {
-    if (f.size > 10 * 1024 * 1024) return toast.error("Max 10MB");
-    if (!["image/jpeg", "image/png", "image/webp"].includes(f.type)) return toast.error("JPG, PNG or WebP only");
+    if (f.size > 10 * 1024 * 1024) return toast.error("Максимум 10 МБ");
+    if (!["image/jpeg", "image/png", "image/webp"].includes(f.type)) return toast.error("Только JPG, PNG или WebP");
     setFile(f);
     setPreview(URL.createObjectURL(f));
   };
@@ -67,11 +67,10 @@ function AddItem() {
     setSeason(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
 
   const save = async () => {
-    if (!user || !file) return toast.error("Add a photo first");
+    if (!user || !file) return toast.error("Сначала добавьте фото");
     setBusy(true);
     try {
-      // 1. Try Remove.bg directly from the browser → fall back silently to original on failure
-      setBusyLabel("Removing background...");
+      setBusyLabel("Удаляем фон...");
       let uploadBlob: Blob = file;
       let ext = (file.name.split(".").pop() || "jpg").toLowerCase();
       try {
@@ -90,8 +89,7 @@ function AddItem() {
         console.warn("remove.bg failed, using original", e);
       }
 
-      // 2. Upload to storage
-      setBusyLabel("Saving…");
+      setBusyLabel("Сохранение…");
       const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
       const { error: upErr } = await supabase.storage
         .from("wardrobe-items")
@@ -105,13 +103,13 @@ function AddItem() {
         season, formality,
       });
       if (error) throw error;
-      toast.success("Added to wardrobe");
+      toast.success("Добавлено в гардероб");
       navigate({ to: "/wardrobe" });
     } catch (e: any) {
-      toast.error(e.message || "Could not save");
+      toast.error(e.message || "Не удалось сохранить");
     } finally {
       setBusy(false);
-      setBusyLabel("Saving…");
+      setBusyLabel("Сохранение…");
     }
   };
 
@@ -120,7 +118,7 @@ function AddItem() {
       <div className="mx-auto max-w-[428px] px-5 py-6 pb-32">
         <div className="flex items-center gap-3 mb-6">
           <Link to="/wardrobe" className="w-9 h-9 rounded-full bg-card flex items-center justify-center"><ArrowLeft size={18} /></Link>
-          <h1 className="font-serif text-3xl">Add Item</h1>
+          <h1 className="font-serif text-3xl">Добавить вещь</h1>
         </div>
 
         <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" hidden
@@ -135,8 +133,8 @@ function AddItem() {
           ) : (
             <>
               <Camera size={36} className="text-muted-foreground" />
-              <span className="text-muted-foreground">Tap to upload photo</span>
-              <span className="text-xs text-muted-foreground">JPG · PNG · WebP · up to 10MB</span>
+              <span className="text-muted-foreground">Нажмите, чтобы загрузить фото</span>
+              <span className="text-xs text-muted-foreground">JPG · PNG · WebP · до 10 МБ</span>
             </>
           )}
         </button>
@@ -144,24 +142,24 @@ function AddItem() {
         {preview && (
           <div className="mt-6 space-y-5">
             <div>
-              <label className="text-sm font-medium block mb-2">Name</label>
-              <input className="input-field" placeholder="e.g. White Linen Blazer" value={name} onChange={(e) => setName(e.target.value)} />
+              <label className="text-sm font-medium block mb-2">Название</label>
+              <input className="input-field" placeholder="напр. Белый льняной блейзер" value={name} onChange={(e) => setName(e.target.value)} />
             </div>
 
             <div>
-              <label className="text-sm font-medium block mb-2">Type</label>
+              <label className="text-sm font-medium block mb-2">Тип</label>
               <select className="input-field" value={type} onChange={(e) => setType(e.target.value)}>
-                {TYPES.map(t => <option key={t}>{t}</option>)}
+                {TYPES.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
               </select>
             </div>
 
             <div>
-              <label className="text-sm font-medium block mb-2">Subtype</label>
+              <label className="text-sm font-medium block mb-2">Подтип</label>
               <input className="input-field" placeholder={SUBTYPE_HINT[type]} value={subtype} onChange={(e) => setSubtype(e.target.value)} />
             </div>
 
             <div>
-              <label className="text-sm font-medium block mb-2">Primary Color</label>
+              <label className="text-sm font-medium block mb-2">Основной цвет</label>
               <div className="flex gap-3 items-center">
                 <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="w-12 h-12 rounded-full border-2 border-border cursor-pointer" />
                 <input className="input-field flex-1" value={color} onChange={(e) => setColor(e.target.value)} />
@@ -169,25 +167,25 @@ function AddItem() {
             </div>
 
             <div>
-              <label className="text-sm font-medium block mb-2">Season</label>
+              <label className="text-sm font-medium block mb-2">Сезон</label>
               <div className="flex flex-wrap gap-2">
                 {SEASONS.map(s => (
-                  <button key={s} onClick={() => toggleSeason(s)} className={`chip ${season.includes(s) ? "chip-active" : ""}`}>{s}</button>
+                  <button key={s.id} onClick={() => toggleSeason(s.id)} className={`chip ${season.includes(s.id) ? "chip-active" : ""}`}>{s.label}</button>
                 ))}
               </div>
             </div>
 
             <div>
-              <label className="text-sm font-medium block mb-2">Formality</label>
+              <label className="text-sm font-medium block mb-2">Формальность</label>
               <select className="input-field" value={formality} onChange={(e) => setFormality(e.target.value)}>
-                {FORMALITIES.map(f => <option key={f}>{f}</option>)}
+                {FORMALITIES.map(f => <option key={f.id} value={f.id}>{f.label}</option>)}
               </select>
             </div>
 
-            <p className="text-xs text-muted-foreground italic">AI will help auto-fill details — coming soon</p>
+            <p className="text-xs text-muted-foreground italic">ИИ скоро будет помогать с авто-заполнением</p>
 
             <button disabled={busy} onClick={save} className="btn-primary w-full">
-              {busy ? busyLabel : "Save to Wardrobe"}
+              {busy ? busyLabel : "Сохранить в гардероб"}
             </button>
           </div>
         )}
