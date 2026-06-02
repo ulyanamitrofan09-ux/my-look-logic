@@ -114,18 +114,17 @@ function makeOutfits(items: Item[], occasion: string): Outfit[] {
   }));
 }
 
-// Items stack vertically like worn: top garment → bottom garment → shoes/bag
-// Each item overlaps the one below it
+// Items stacked vertically with fixed height — top → bottom → shoes/bag
 const POS3 = [
-  { position: "absolute", top: "0%",  left: "12%", width: "78%", transform: "rotate(-5deg)", zIndex: 3 },
-  { position: "absolute", top: "32%", left: "5%",  width: "82%", transform: "rotate(4deg)",  zIndex: 2 },
-  { position: "absolute", top: "62%", left: "18%", width: "66%", transform: "rotate(-3deg)", zIndex: 1 },
-] as const;
+  { top: "0%",  left: "6%",  width: "86%", height: "44%", transform: "rotate(-5deg)", zIndex: 3 },
+  { top: "30%", left: "2%",  width: "86%", height: "44%", transform: "rotate(4deg)",  zIndex: 2 },
+  { top: "60%", left: "10%", width: "74%", height: "38%", transform: "rotate(-3deg)", zIndex: 1 },
+];
 
 const POS2 = [
-  { position: "absolute", top: "4%",  left: "10%", width: "80%", transform: "rotate(-5deg)", zIndex: 2 },
-  { position: "absolute", top: "44%", left: "8%",  width: "76%", transform: "rotate(4deg)",  zIndex: 1 },
-] as const;
+  { top: "3%",  left: "6%",  width: "86%", height: "50%", transform: "rotate(-5deg)", zIndex: 2 },
+  { top: "46%", left: "4%",  width: "82%", height: "50%", transform: "rotate(4deg)",  zIndex: 1 },
+];
 
 function OutfitCard({ outfit, index }: { outfit: Outfit; index: number; onSave: () => void; }) {
   const [palette, setPalette] = useState<string[]>(FALLBACK_PALETTES[index % FALLBACK_PALETTES.length]);
@@ -140,7 +139,7 @@ function OutfitCard({ outfit, index }: { outfit: Outfit; index: number; onSave: 
   return (
     <article style={{ borderRadius: 20, overflow: "hidden", background: "#F7F3EE", boxShadow: "0 4px 24px rgba(0,0,0,0.09)" }}>
       {/* Main collage area */}
-      <div style={{ display: "flex", height: 320 }}>
+      <div style={{ display: "flex", height: 380 }}>
 
         {/* Left: number + name + palette */}
         <div style={{ width: "36%", flexShrink: 0, padding: "22px 12px 22px 20px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
@@ -158,11 +157,20 @@ function OutfitCard({ outfit, index }: { outfit: Outfit; index: number; onSave: 
         {/* Right: flat lay collage */}
         <div style={{ flex: 1, position: "relative", overflow: "hidden" }}>
           {outfit.items.slice(0, positions.length).map((item, i) => (
-            <div key={item.id} style={{ ...positions[i] as React.CSSProperties, filter: "drop-shadow(2px 6px 16px rgba(0,0,0,0.18))" }}>
+            <div key={item.id} style={{
+              position: "absolute",
+              top: positions[i].top,
+              left: positions[i].left,
+              width: positions[i].width,
+              height: positions[i].height,
+              transform: positions[i].transform,
+              zIndex: positions[i].zIndex,
+              filter: "drop-shadow(2px 6px 16px rgba(0,0,0,0.15))",
+            }}>
               <img
                 src={item.photo_url}
                 alt={item.name || item.type}
-                style={{ width: "100%", objectFit: "contain", mixBlendMode: "multiply", display: "block" }}
+                style={{ width: "100%", height: "100%", objectFit: "contain", mixBlendMode: "multiply", display: "block" }}
               />
             </div>
           ))}
