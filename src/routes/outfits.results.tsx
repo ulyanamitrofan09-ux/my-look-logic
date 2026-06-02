@@ -35,42 +35,37 @@ function makeOutfits(items: Item[], occasion: string): Outfit[] {
   const usedKeys = new Set<string>();
   const usedItems = new Set<string>();
 
-  const tryPush = (set: Item[]) => {
-    const uniq = Array.from(new Map(set.map(i => [i.id, i])).values());
-    if (uniq.length < 2) return false;
-    const key = uniq.map(i => i.id).sort().join("|");
-    if (usedKeys.has(key)) return false;
-    usedKeys.add(key);
-    uniq.forEach(i => usedItems.add(i.id));
-    combos.push(uniq.slice(0, 3));
-    return true;
+  const take = (pool: Item[]): Item | undefined => {
+    const fresh = pool.find(i => !usedItems.has(i.id));
+    if (fresh) { usedItems.add(fresh.id); return fresh; }
+    return undefined;
   };
 
-  const pickFresh = (pool: Item[]): Item | undefined =>
-    pool.find(i => !usedItems.has(i.id)) || pool[Math.floor(Math.random() * pool.length)];
-
-  for (let i = 0; i < target * 4 && combos.length < target; i++) {
+  const tryBuild = (): Item[] => {
     const set: Item[] = [];
     if (tops.length && bottoms.length) {
-      const t = pickFresh(tops); if (t) set.push(t);
-      const b = pickFresh(bottoms); if (b) set.push(b);
+      const t = take(tops); if (t) set.push(t);
+      const b = take(bottoms); if (b) set.push(b);
     } else if (dresses.length) {
-      const d = pickFresh(dresses); if (d) set.push(d);
+      const d = take(dresses); if (d) set.push(d);
     }
-    const sh = pickFresh(shoes); if (sh) set.push(sh);
-    if (set.length < 3) { const a = pickFresh(accents); if (a) set.push(a); }
-    if (!tryPush(set)) {
-      // reset used items to allow reuse if we can't find fresh combos
-      if (i === target * 2) usedItems.clear();
-    }
+    const sh = take(shoes); if (sh) set.push(sh);
+    if (set.length < 3) { const a = take(accents); if (a) set.push(a); }
+    return set;
+  };
+
+  for (let i = 0; i < target; i++) {
+    const set = tryBuild();
+    const uniq = Array.from(new Map(set.map(it => [it.id, it])).values());
+    if (uniq.length < 2) break;
+    const key = uniq.map(it => it.id).sort().join("|");
+    if (usedKeys.has(key)) break;
+    usedKeys.add(key);
+    combos.push(uniq.slice(0, 3));
   }
 
-  let guard = 0;
-  while (combos.length < target && items.length >= 2 && guard++ < 30) {
-    tryPush(shuffle(items).slice(0, 3));
-  }
+  return combos.map((set, i) => ({
 
-  return combos.slice(0, target).map((set, i) => ({
     name: NAMES[i % NAMES.length],
     explanation: `Этот образ подходит для «${occasion.toLowerCase()}», потому что вещи объединены тональной гармонией — примерно 60% нейтральных оттенков, 30% средних и 10% акцентных, — а пропорции остаются сбалансированными. Уровень формальности попадает точно в нужный регистр, без лишних усилий.`,
     tags: TAGS[i % TAGS.length],
