@@ -70,14 +70,21 @@ function AddItem() {
     if (!user || !file) return toast.error("Add a photo first");
     setBusy(true);
     try {
-      // 1. Try Remove.bg → fall back silently to original on failure
+      // 1. Try Remove.bg directly from the browser → fall back silently to original on failure
       setBusyLabel("Removing background...");
       let uploadBlob: Blob = file;
       let ext = (file.name.split(".").pop() || "jpg").toLowerCase();
       try {
-        const imageBase64 = await fileToBase64(file);
-        const { pngBase64 } = await removeBg({ data: { imageBase64, filename: file.name } });
-        uploadBlob = base64ToBlob(pngBase64, "image/png");
+        const formData = new FormData();
+        formData.append("image_file", file);
+        formData.append("size", "auto");
+        const response = await fetch("https://api.remove.bg/v1.0/removebg", {
+          method: "POST",
+          headers: { "X-Api-Key": "PDxZCD3kKniPqeCs5SULBrbX" },
+          body: formData,
+        });
+        if (!response.ok) throw new Error(`remove.bg ${response.status}`);
+        uploadBlob = await response.blob();
         ext = "png";
       } catch (e) {
         console.warn("remove.bg failed, using original", e);
