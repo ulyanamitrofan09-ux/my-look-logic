@@ -114,16 +114,16 @@ function makeOutfits(items: Item[], occasion: string): Outfit[] {
   }));
 }
 
-// Items stacked vertically with fixed height — top → bottom → shoes/bag
+// Ghost mannequin: items overlap like worn on a body, minimal rotation
 const POS3 = [
-  { top: "0%",  left: "6%",  width: "86%", height: "44%", transform: "rotate(-5deg)", zIndex: 3 },
-  { top: "30%", left: "2%",  width: "86%", height: "44%", transform: "rotate(4deg)",  zIndex: 2 },
-  { top: "60%", left: "10%", width: "74%", height: "38%", transform: "rotate(-3deg)", zIndex: 1 },
+  { top: "0%",  left: "8%",  width: "78%", zIndex: 3, transform: "rotate(-2deg)" },
+  { top: "34%", left: "14%", width: "78%", zIndex: 2, transform: "rotate(1deg)"  },
+  { top: "66%", left: "18%", width: "62%", zIndex: 1, transform: "rotate(-1deg)" },
 ];
 
 const POS2 = [
-  { top: "3%",  left: "6%",  width: "86%", height: "50%", transform: "rotate(-5deg)", zIndex: 2 },
-  { top: "46%", left: "4%",  width: "82%", height: "50%", transform: "rotate(4deg)",  zIndex: 1 },
+  { top: "0%",  left: "8%",  width: "82%", zIndex: 2, transform: "rotate(-2deg)" },
+  { top: "42%", left: "10%", width: "80%", zIndex: 1, transform: "rotate(1deg)"  },
 ];
 
 function OutfitCard({ outfit, index }: { outfit: Outfit; index: number; onSave: () => void; }) {
@@ -139,7 +139,7 @@ function OutfitCard({ outfit, index }: { outfit: Outfit; index: number; onSave: 
   return (
     <article style={{ borderRadius: 20, overflow: "hidden", background: "#F7F3EE", boxShadow: "0 4px 24px rgba(0,0,0,0.09)" }}>
       {/* Main collage area */}
-      <div style={{ display: "flex", height: 380 }}>
+      <div style={{ display: "flex", height: 420 }}>
 
         {/* Left: number + name + palette */}
         <div style={{ width: "36%", flexShrink: 0, padding: "22px 12px 22px 20px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
@@ -162,15 +162,14 @@ function OutfitCard({ outfit, index }: { outfit: Outfit; index: number; onSave: 
               top: positions[i].top,
               left: positions[i].left,
               width: positions[i].width,
-              height: positions[i].height,
               transform: positions[i].transform,
               zIndex: positions[i].zIndex,
-              filter: "drop-shadow(2px 6px 16px rgba(0,0,0,0.15))",
+              filter: "drop-shadow(1px 4px 12px rgba(0,0,0,0.12))",
             }}>
               <img
                 src={item.photo_url}
                 alt={item.name || item.type}
-                style={{ width: "100%", height: "100%", objectFit: "contain", mixBlendMode: "multiply", display: "block" }}
+                style={{ width: "100%", objectFit: "contain", display: "block" }}
               />
             </div>
           ))}
