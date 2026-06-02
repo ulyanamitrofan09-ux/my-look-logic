@@ -22,7 +22,15 @@ export const Route = createFileRoute("/wardrobe/")({
   component: () => <AuthGate><WardrobePage /></AuthGate>,
 });
 
-const FILTERS = ["All", "Tops", "Bottoms", "Dresses", "Shoes", "Bags", "Accessories"] as const;
+const FILTERS = [
+  { id: "All", label: "Все" },
+  { id: "Tops", label: "Верх" },
+  { id: "Bottoms", label: "Низ" },
+  { id: "Dresses", label: "Платья" },
+  { id: "Shoes", label: "Обувь" },
+  { id: "Bags", label: "Сумки" },
+  { id: "Accessories", label: "Аксессуары" },
+] as const;
 
 const TYPE_MAP: Record<string, string[]> = {
   Tops: ["Top"], Bottoms: ["Bottom"], Dresses: ["Dress", "Jumpsuit"],
@@ -60,6 +68,12 @@ function WardrobePage() {
   }, [user]);
 
   const filtered = filter === "All" ? items : items.filter(i => TYPE_MAP[filter]?.includes(i.type));
+  function plural(n: number, one: string, few: string, many: string) {
+    const mod10 = n % 10, mod100 = n % 100;
+    if (mod10 === 1 && mod100 !== 11) return one;
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return few;
+    return many;
+  }
   const firstLetter = (user?.user_metadata?.name || user?.email || "?")[0].toUpperCase();
 
   const handleDelete = async (item: any) => {
@@ -110,20 +124,20 @@ function WardrobePage() {
       </header>
 
       <div className="px-5 text-sm text-muted-foreground">
-        {items.length} item{items.length === 1 ? "" : "s"} · {outfitCount} outfit{outfitCount === 1 ? "" : "s"} saved
+        {items.length} {plural(items.length, "вещь", "вещи", "вещей")} · {outfitCount} {plural(outfitCount, "сохранённый образ", "сохранённых образа", "сохранённых образов")}
       </div>
 
       <div className="mt-4 px-5 overflow-x-auto no-scrollbar">
         <div className="flex gap-2 pb-2">
           {FILTERS.map(f => (
-            <button key={f} onClick={() => setFilter(f)} className={`chip ${filter === f ? "chip-active" : ""}`}>{f}</button>
+            <button key={f.id} onClick={() => setFilter(f.id)} className={`chip ${filter === f.id ? "chip-active" : ""}`}>{f.label}</button>
           ))}
         </div>
       </div>
 
       <div className="px-5 mt-4">
         {loading ? (
-          <div className="text-muted-foreground text-sm text-center py-20">Loading wardrobe…</div>
+          <div className="text-muted-foreground text-sm text-center py-20">Загрузка гардероба…</div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">
             <div className="w-20 h-20 mx-auto mb-5 rounded-full bg-secondary flex items-center justify-center">
@@ -131,9 +145,9 @@ function WardrobePage() {
                 <path d="M12 4a2 2 0 100 4 2 2 0 000-4zM12 8v2m-8 6l8-6 8 6M4 16l8 4 8-4" />
               </svg>
             </div>
-            <h3 className="font-serif text-2xl mb-1">Your wardrobe is empty</h3>
-            <p className="text-muted-foreground mb-6">Add your first piece to get started</p>
-            <Link to="/wardrobe/add" className="btn-primary">Add first item</Link>
+            <h3 className="font-serif text-2xl mb-1">Ваш гардероб пуст</h3>
+            <p className="text-muted-foreground mb-6">Добавьте первую вещь, чтобы начать</p>
+            <Link to="/wardrobe/add" className="btn-primary">Добавить первую вещь</Link>
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
@@ -176,7 +190,7 @@ function WardrobePage() {
       {items.length > 0 && (
         <Link to="/wardrobe/add"
           className="fixed bottom-24 right-[max(1.25rem,calc(50%-214px+1.25rem))] z-30 bg-dark text-dark-foreground rounded-full shadow-lg flex items-center gap-2 px-5 py-3.5">
-          <Plus size={18} /> <span className="text-sm font-medium">Add Item</span>
+          <Plus size={18} /> <span className="text-sm font-medium">Добавить</span>
         </Link>
       )}
 
