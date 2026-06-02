@@ -12,7 +12,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
   if (loading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-muted-foreground text-sm">Loading…</div>
+        <div className="text-muted-foreground text-sm">Загрузка…</div>
       </div>
     );
   }

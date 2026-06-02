@@ -2,10 +2,10 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Shirt, Sparkles, Bookmark, User } from "lucide-react";
 
 const tabs = [
-  { to: "/wardrobe", label: "Wardrobe", Icon: Shirt },
-  { to: "/outfits", label: "Outfits", Icon: Sparkles },
-  { to: "/lookbook", label: "Lookbook", Icon: Bookmark },
-  { to: "/profile", label: "Profile", Icon: User },
+  { to: "/wardrobe", label: "Гардероб", Icon: Shirt },
+  { to: "/outfits", label: "Образы", Icon: Sparkles },
+  { to: "/lookbook", label: "Лукбук", Icon: Bookmark },
+  { to: "/profile", label: "Профиль", Icon: User },
 ] as const;
 
 export function BottomNav() {
