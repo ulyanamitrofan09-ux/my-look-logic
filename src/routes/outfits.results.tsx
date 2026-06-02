@@ -49,7 +49,7 @@ async function extractColors(url: string): Promise<string[]> {
           const [r, g, b, a] = [data[i], data[i+1], data[i+2], data[i+3]];
           if (a < 100) continue;
           const bright = r + g + b;
-          if (bright > 735 || bright < 40) continue;
+          if (bright > 758 || bright < 30) continue;
           const key = `${Math.round(r/30)*30},${Math.round(g/30)*30},${Math.round(b/30)*30}`;
           const e = map.get(key);
           if (e) { e.r += r; e.g += g; e.b += b; e.n++; }
@@ -114,16 +114,17 @@ function makeOutfits(items: Item[], occasion: string): Outfit[] {
   }));
 }
 
-// Positions for 3 items: top-right, middle-left, bottom-right
+// Items stack vertically like worn: top garment → bottom garment → shoes/bag
+// Each item overlaps the one below it
 const POS3 = [
-  { position: "absolute", top: "0%",  right: "-5%", width: "62%", transform: "rotate(-6deg)", zIndex: 3 },
-  { position: "absolute", top: "22%", left: "-5%",  width: "58%", transform: "rotate(5deg)",  zIndex: 2 },
-  { position: "absolute", top: "52%", right: "0%",  width: "52%", transform: "rotate(-4deg)", zIndex: 1 },
+  { position: "absolute", top: "0%",  left: "12%", width: "78%", transform: "rotate(-5deg)", zIndex: 3 },
+  { position: "absolute", top: "32%", left: "5%",  width: "82%", transform: "rotate(4deg)",  zIndex: 2 },
+  { position: "absolute", top: "62%", left: "18%", width: "66%", transform: "rotate(-3deg)", zIndex: 1 },
 ] as const;
 
 const POS2 = [
-  { position: "absolute", top: "5%",  right: "-5%", width: "65%", transform: "rotate(-6deg)", zIndex: 2 },
-  { position: "absolute", top: "42%", left: "-5%",  width: "60%", transform: "rotate(5deg)",  zIndex: 1 },
+  { position: "absolute", top: "4%",  left: "10%", width: "80%", transform: "rotate(-5deg)", zIndex: 2 },
+  { position: "absolute", top: "44%", left: "8%",  width: "76%", transform: "rotate(4deg)",  zIndex: 1 },
 ] as const;
 
 function OutfitCard({ outfit, index }: { outfit: Outfit; index: number; onSave: () => void; }) {
